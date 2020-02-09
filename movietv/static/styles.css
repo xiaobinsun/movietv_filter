@@ -1,0 +1,84 @@
+ul {
+    list-style-type: none;
+    margin: 17px;
+}
+ul > li {
+    display: inline-block;
+    border-radius: 5px;
+    margin: 5px 7px;
+    padding: 2px 4px;
+}
+input {
+    width: 40px;
+    margin-left: 10px;
+    -moz-appearance: textfield;
+}
+body > ul > li:hover {
+    color: blue;
+    cursor: pointer;
+}
+li.selected {
+    background-color: #258dcd;
+}
+li.selected > span {
+    color: white;
+}
+a {
+    text-decoration: none;
+}
+#tbldiv {
+    margin-left: 50px;
+}
+table {
+    width: 90%;
+    margin-top: 30px;
+    margin-left: 12px;
+    table-layout: fixed;
+    border-collapse: collapse;
+    border: 1px solid;
+}
+thead th:nth-child(1) {
+    width: 50%;
+}
+thead th:nth-child(2) {
+    width: 15%;
+}
+thead th:nth-child(3) {
+    width: 15%;
+}
+thead th:nth-child(4) {
+    width: 10%;
+}
+thead th:nth-child(5) {
+    width: 10%;
+}
+th, td {
+    border-collapse: collapse;
+    border-top: 1px solid #0094ff;
+    border-bottom: 1px solid #0094ff;
+    padding: 10px 20px;
+    text-align: center;
+}
+.pagination {
+    min-width: 700px;
+    margin-left: 300px;
+}
+#step-links > button.curpage {
+    background-color: blue;
+}
+#step-links > button {
+    height: 30px;
+    float: left;
+    position: relative;
+    display: inline-block;
+    margin: 20px 0px;
+    padding: 2px 15px;
+    border: 1px solid;
+    border-collapse: collapse;
+    text-align: center;
+    background-color: white;
+}
+#step-links > button:hover {
+    cursor: pointer;
+    background-color: grey;
+}

@@ -1,0 +1,23 @@
+<table>
+<tbody>
+{% for item in rpage %}
+  <tr>
+    <td> <a href="{% with item.id|slugify as idstr %}
+                    {{baseurl|add:idstr|add:"/" }}
+                    {% endwith %}"> {{ item.title }} </a> </td>
+    <td> {{ item.release_date|date:"Y-m-d" }} </td>
+    <td> {{ item.region }} </td>
+    <td> {{ item.score__score }} </td>
+    <td> {{ item.score__votes }} </td>
+  </tr>
+{% empty %}
+  <tr>
+    <td colspan=5> 抱歉，您的搜索没有匹配的结果 </td>
+  </tr>
+{% endfor %}
+</tbody>
+</table>
+
+<span id="step-links">
+  {{ pagination|safe }}
+</span>

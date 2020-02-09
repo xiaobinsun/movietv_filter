@@ -1,0 +1,118 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="{% static 'styles.css' %}"/>
+  <script defer src="{% static 'main.js' %}"></script>
+	<meta charset="UTF-8"/>
+</head>
+
+<body>
+  <ul class="singleops" id="form">
+    <li class="selected"> <span class="tag"> 全部形式 </span> </li>
+    <li> <span class="tag"> 电影 </span> </li>
+    <li> <span class="tag"> 电视剧 </span> </li>
+  </ul>
+  <ul class="multipleops" id="type">
+    <li class="selected"> <span class="tag"> 全部类型 </span> </li>
+    <li> <span class="tag"> 剧情 </span> </li>
+    <li> <span class="tag"> 喜剧 </span> </li>
+    <li> <span class="tag"> 动作 </span> </li>
+    <li> <span class="tag"> 爱情 </span> </li>
+    <li> <span class="tag"> 科幻 </span> </li>
+    <li> <span class="tag"> 动画 </span> </li>
+    <li> <span class="tag"> 悬疑 </span> </li>
+    <li> <span class="tag"> 惊悚 </span> </li>
+    <li> <span class="tag"> 恐怖 </span> </li>
+    <li> <span class="tag"> 犯罪 </span> </li>
+    <li> <span class="tag"> 同性 </span> </li>
+    <br/>
+    <li> <span class="tag"> 音乐 </span> </li>
+    <li> <span class="tag"> 歌舞 </span> </li>
+    <li> <span class="tag"> 传记 </span> </li>
+    <li> <span class="tag"> 历史 </span> </li>
+    <li> <span class="tag"> 战争 </span> </li>
+    <li> <span class="tag"> 西部 </span> </li>
+    <li> <span class="tag"> 奇幻 </span> </li>
+    <li> <span class="tag"> 冒险 </span> </li>
+    <li> <span class="tag"> 灾难 </span> </li>
+    <li> <span class="tag"> 武侠 </span> </li>
+    <li> <span class="tag"> 情色 </span> </li>
+    <li> <span class="tag"> 纪录片 </span> </li>
+  </ul>
+  <ul class="singleops" id="region">
+    <li class="selected"> <span class="tag"> 全部地区 </span> </li>
+    <li> <span class="tag"> 中国大陆 </span> </li>
+    <li> <span class="tag"> 美国 </span> </li>
+    <li> <span class="tag"> 中国香港 </span> </li>
+    <li> <span class="tag"> 中国台湾 </span> </li>
+    <li> <span class="tag"> 日本 </span> </li>
+    <li> <span class="tag"> 韩国 </span> </li>
+    <li> <span class="tag"> 英国 </span> </li>
+    <li> <span class="tag"> 法国 </span> </li>
+    <li> <span class="tag"> 德国 </span> </li>
+    <li> <span class="tag"> 意大利 </span> </li>
+    <li> <span class="tag"> 西班牙 </span> </li>
+    <br/>
+    <li> <span class="tag"> 印度 </span> </li>
+    <li> <span class="tag"> 泰国 </span> </li>
+    <li> <span class="tag"> 俄罗斯 </span> </li>
+    <li> <span class="tag"> 伊朗 </span> </li>
+    <li> <span class="tag"> 加拿大 </span> </li>
+    <li> <span class="tag"> 澳大利亚 </span> </li>
+    <li> <span class="tag"> 瑞典 </span> </li>
+    <li> <span class="tag"> 爱尔兰 </span> </li>
+    <li> <span class="tag"> 巴西 </span> </li>
+    <li> <span class="tag"> 丹麦 </span> </li>
+  </ul>
+  <form>
+    <ul>
+    <li>
+      <span class="tag"> 上映时间 </span>
+      <input type="number" min="0" value="0" id="begin">
+      <label for="begin"> 天 </label>
+      <span id="dash"> - </span>
+      <input type="number" min="0" placeholder="MAX" id="end">
+      <label for="end"> 天 </label>
+    </li>
+    <li>
+      <span> 评分 </span>
+      <input type="number" min="1.0" value="0" id="sbegin">
+      <label for="sbegin"></label>
+      <span> - </span>
+      <input type="number" min="1.0" max="10.0" value="10.0" id="send">
+      <label for="send"></label>
+    </li>
+    <li>
+      <span> 投票数 </span>
+      <input type="number" value="0" id="vbegin">
+      <label for="vbegin"></label>
+      <span> - <span>
+      <input type="number" placeholder="MAX" id="vend">
+      <label for="vend"></label>
+    </li>
+    <button type="button" id="submit"> 提交 </button>
+    </ul>
+  </form>
+  <div id="tbldiv">
+  <table id="rtable">
+    <thead>
+      <tr>
+        <th> 影视名 </th>
+        <th> 上映时间 </th>
+        <th> 地区 </th>
+        <th> 评分 </th>
+        <th> 评分人数 </th>
+      </tr>
+    </thead>
+    <tbody id="rbody">
+    </tbody>
+  </table/>
+  </div>
+  <div class="pagination">
+    <span id="step-links">
+    </span>
+  </div>
+
+</body>
+</html>
