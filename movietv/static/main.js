@@ -100,11 +100,27 @@ function buildPage(addAm) {
     let str = '';
     let sl = document.querySelector('#step-links');
 
+    if (sl.curpage == undefined)
+        sl.curpage = 1;
+
     if (addAm)
         str += '&page=' + sl.curpage;
     else
         str += 'page=' + sl.curpage;
 
+    return str;
+}
+function buildOrderby(addAm) {
+    let str = '';
+    let tb = document.querySelector('#rtable');
+
+    if (tb.cursort == undefined)
+        tb.cursort = 'S';
+
+    if (addAm)
+        str += '&orderby=' + tb.cursort;
+    else
+        str += 'orderby=' + tb.cursort;
     return str;
 }
 function buildFetchArgs() {
@@ -116,6 +132,7 @@ function buildFetchArgs() {
     url += buildScoreRange(url[url.length-1] != '?');
     url += buildVotesRange(url[url.length-1] != '?');
     url += buildPage(url[url.length-1] != '?');
+    url += buildOrderby(url[url.length-1] != '?');
     return url;
 }
 function fireFetch() {
@@ -133,9 +150,6 @@ function fireFetch() {
             alist.forEach(item => item.addEventListener('click', pageSelect));
 
             let sl = document.querySelector('#step-links');
-            if (sl.curpage == undefined) {
-                sl.curpage = 1;
-            }
 
             sl.querySelectorAll('button').forEach(elm => {
                 if (elm.id == '#') {
@@ -145,6 +159,35 @@ function fireFetch() {
                     elm.classList.add('curpage');
                 }
             });
+
+            tb = document.querySelector('#rtable');
+            document.querySelectorAll('th.sortable').forEach(elm => {
+                if (elm.classList.contains('cursort')) {
+                    if (tb.cursort.toUpperCase() == elm.dataset.sort) {
+                        let aSpan = elm.querySelector('span');
+                        if (!aSpan) {
+                            aSpan = document.createElement('span');
+                            elm.appendChild(aSpan);
+                        }
+                        aSpan.innerHTML = tb.cursort == tb.cursort.toLowerCase()
+                                            ? "&#8593" : "&#8595";
+                    } else {
+                        elm.classList.remove('cursort');
+                        let aSpan = elm.querySelector('span');
+                        aSpan.remove();
+                    }
+                } else {
+                    if (tb.cursort.toUpperCase() == elm.dataset.sort) {
+                        elm.classList.add('cursort');
+                        let aSpan = document.createElement('span');
+                        aSpan.innerHTML = tb.cursort == tb.cursort.toLowerCase()
+                                            ? "&#8593" : "&#8595";
+                        elm.appendChild(aSpan);
+                    }
+                }
+            });
+
+            window.location.href = '#form';
         });
 }
 function pageSelect(e) {
@@ -154,6 +197,21 @@ function pageSelect(e) {
         sl.curpage = this.id;
         fireFetch();
     }
+}
+function thClick(e) {
+    let tb = document.querySelector('#rtable');
+    let c = this.dataset.sort;
+
+    if (tb.cursort.toUpperCase() != this.dataset.sort) {
+        let sl = document.querySelector('#step-links');
+        sl.curpage = 1;
+    }
+
+    if (this.classList.contains('cursort'))
+        c = c === c.toLowerCase() ? c.toUpperCase() : c.toLowerCase();
+
+    tb.cursort = c;
+    fireFetch();
 }
 function liClick(e) {
     let ul = this.parentNode;
@@ -184,6 +242,9 @@ function liClick(e) {
 document.addEventListener('DOMContentLoaded', function(){
     let elist = document.querySelectorAll("body > ul > li");
     elist.forEach(item => item.addEventListener('click', liClick));
+
+    let thead = document.querySelectorAll('th.sortable');
+    thead.forEach(item => item.addEventListener('click', thClick));
 
     let bton = document.querySelector('#submit');
     bton.addEventListener('click', fireFetch);

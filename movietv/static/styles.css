@@ -47,10 +47,10 @@ thead th:nth-child(3) {
     width: 15%;
 }
 thead th:nth-child(4) {
-    width: 10%;
+    width: 8%;
 }
 thead th:nth-child(5) {
-    width: 10%;
+    width: 12%;
 }
 th, td {
     border-collapse: collapse;
@@ -58,6 +58,10 @@ th, td {
     border-bottom: 1px solid #0094ff;
     padding: 10px 20px;
     text-align: center;
+}
+th.sortable:hover {
+    cursor: pointer;
+    background-color: green;
 }
 .pagination {
     min-width: 700px;
