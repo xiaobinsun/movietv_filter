@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="{% static 'statis.css' %}"/>
+  <script def src="{% static 'statis.js' %}"></script>
+  <meta charset="UTF-8"/>
+</head>
+<body>
+  <div id="hotdiv">
+    <h3> 最近热门 </h3>
+    <form id="hotform">
+      <span>最近</span>
+      <select id="days">
+        <option value="3"> 3 </option>
+        <option value="5"> 5 </option>
+        <option value="10"> 10 </option>
+        <option value="15"> 15 </option>
+        <option value="30"> 30 </option>
+      </select>
+      <span>天</span>
+      <span id="releasedays"> 上映时间大于 </span>
+      <input type="number" min="0" id="rdays">
+      <span> 天 </span>
+      <button type="button" id="hotsubmit"> 提交 </button>
+    </form>
+    <div id="imgdiv">
+    </div>
+  </div>
+
+</body>
+</html>
+

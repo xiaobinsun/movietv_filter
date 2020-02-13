@@ -1,16 +1,29 @@
 import logging
 from datetime import datetime, timedelta
+from io import BytesIO
+
+import math
+import pandas as pd
+import matplotlib.font_manager as mfm
+import matplotlib.pyplot as plt
+import matplotlib.colors as pltc
+from random import sample
 
 from django.shortcuts import render, redirect, resolve_url
 from django.views.generic import TemplateView
 from django.db import connection
 from django.db.models import Q, OuterRef, Subquery
 from django.core.paginator import Paginator
+from django.contrib.staticfiles.finders import find as find_static_file
+from django.http import FileResponse
+from django.conf import settings
 
 from .utils import BraceMessage as _
 from .models import MovieTv as MT, Score, Tag
 
 logger = logging.getLogger('movietv')
+
+all_colors = [k for k, v in pltc.cnames.items()]
 
 class HomePageView(TemplateView):
     template_name = 'index.html'
@@ -176,7 +189,7 @@ def filter(request):
     if orderby is not None:
         qS = qS.order_by(orderDict[orderby])
 
-    qS = qS.values('id', 'title', 'release_date', 'type', 'region',
+    qS = qS.distinct().values('id', 'title', 'release_date', 'type', 'region',
                    'score__score', 'score__votes')
 
     logger.debug(str(qS.query))
@@ -187,3 +200,111 @@ def filter(request):
     return render(request, 'filter.html', {'rpage': rpage,
                                 'baseurl': 'https://movie.douban.com/subject/',
                                 'pagination': pagination_render(rpage)})
+
+def calvdiff(x, days):
+    sdate = datetime.today() - timedelta(days=int(days))
+    x = x.sort_values('score_date')
+    idx = x['score_date'].searchsorted(sdate)
+
+    if len(x) - idx - 1 > 1:
+        idx += 1
+    elif idx == len(x) - 1:
+        idx -= 1
+
+    date_diff = x.iloc[-1].score_date - x.iloc[idx].score_date
+    votes_diff = int(x.iloc[-1].votes - x.iloc[idx].votes)
+    vavg = math.ceil(votes_diff / date_diff.days)
+
+    return pd.Series({'title': x.iloc[-1].id__title,
+                      'release_date': x.iloc[-1].id__release_date,
+                      'score': x.iloc[-1].score,
+                      'votes': x.iloc[-1].votes,
+                      'vavg': vavg})
+
+
+def statis(request):
+    if len(request.GET) == 0:
+        return render(request, 'statis.html')
+
+    days = request.GET.get('days', 3)
+    rdays =request.GET.get('rdays', None)
+    counts = request.GET.get('counts', 30)
+
+    logdict = {}
+    msg = 'Statistic: '
+    if days is not None:
+        msg += 'days({days}) '
+        logdict['days'] = days
+    if rdays is not None:
+        msg += 'rdays({rdays}) '
+        logdict['rdays'] = rdays
+    if counts is not None:
+        msg += 'counts({counts}) '
+        logdict['counts'] = counts
+
+    logger.debug(_(msg, **logdict))
+
+    today = datetime.today()
+    fil = 'images/' + today.strftime('%Y-%m-%d') + '-' + str(days) + '.svg'
+    if find_static_file(fil) is not None:
+        return render(request, 'hottest.html', {'imgpath': fil})
+        #return FileResponse(open(absfil, 'rb'))
+
+    sdate = today - timedelta(days=700)
+    query = Q(id__release_date__gte=sdate)
+    if rdays is not None:
+        edate = today - timedelta(days=int(rdays))
+        query &= Q(id__release_date__lte=edate)
+
+    qS = Score.objects.filter(query).values('id', 'score_date', 'score', 'votes',
+                                            'id__title', 'id__release_date')
+
+    logger.debug(str(qS.query))
+
+    df = pd.DataFrame(qS)
+    df['score_date'] = pd.to_datetime(df['score_date'])
+    df['id__release_date'] = pd.to_datetime(df['id__release_date'])
+
+    sdate = datetime.today() - timedelta(days=int(days))
+    df = df.groupby(by='id', sort=False).filter(lambda x:
+                                x['score_date'].max() >= sdate
+                                           and len(x) > 1)
+    df = df.groupby(by='id', sort=False).apply(calvdiff, days=days)
+    df = df.sort_values('vavg', ascending=False)
+    df = df[:counts]
+
+    # plot
+    plt.style.use('ggplot')
+
+    fig, ax = plt.subplots()
+    fig.set_size_inches(9, 6)
+    fig.patch.set_visible(False)
+
+    color = sample(all_colors, counts)
+    df['vavg'].plot.barh(ax=ax, color=color)
+    #ax.get_yaxis().set_visible(False)
+    ax.set_yticklabels([i for i in range(1, counts + 1)])
+    ax.invert_yaxis()
+    #ax.patch.set_visible(False)
+    ax.legend().set_visible(False)
+
+    fontpath = '/usr/share/fonts/source-han-serif/SourceHanSerifSC-Regular.otf'
+    font = mfm.FontProperties(fname=fontpath)
+    for idx in range(counts):
+        ax.annotate('{}({})'.format(df.iloc[idx].title, df.iloc[idx].score),
+                    (df.iloc[idx].vavg + 30, idx),
+                    url='https://movie.douban.com/subject/'+str(df.index[idx])+'/',
+                    fontproperties=font, va='center')
+        '''
+        ax.text(df.iloc[idx].vavg + 30, idx,
+                '{}({})'.format(df.iloc[idx].title, df.iloc[idx].score),
+                url='https://movie.douban.com/subject/' + str(df.index[idx]) + '/',
+                fontproperties=font,
+                va='center')
+        '''
+
+    absfil = settings.STATICFILES_DIRS[0] + fil
+    fig.savefig(absfil)
+
+    return render(request, 'hottest.html', {'imgpath': fil})
+    #return FileResponse(open(absfil, 'rb'))

@@ -123,7 +123,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-#    '/home/sun/src/web/douban/movietv/static/',
+    BASE_DIR + '/movietv/static/',
 ]
 
 # Logs
