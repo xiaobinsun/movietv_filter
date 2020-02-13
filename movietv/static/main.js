@@ -237,6 +237,11 @@ function liClick(e) {
                 ul.firstElementChild.classList.add('selected');
         }
     }
+
+    /* reset page */
+    let sl = document.querySelector('#step-links');
+    sl.curpage = 1;
+
     fireFetch();
 }
 document.addEventListener('DOMContentLoaded', function(){
@@ -247,6 +252,11 @@ document.addEventListener('DOMContentLoaded', function(){
     thead.forEach(item => item.addEventListener('click', thClick));
 
     let bton = document.querySelector('#submit');
-    bton.addEventListener('click', fireFetch);
+    bton.addEventListener('click', e => {
+        /* reset page */
+        let sl = document.querySelector('#step-links');
+        sl.curpage = 1;
+        fireFetch();
+    });
     fireFetch();
 });
