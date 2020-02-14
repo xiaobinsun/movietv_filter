@@ -12,14 +12,14 @@ from random import sample
 from django.shortcuts import render, redirect, resolve_url
 from django.views.generic import TemplateView
 from django.db import connection
-from django.db.models import Q, OuterRef, Subquery
+from django.db.models import F, Q, OuterRef, Subquery
 from django.core.paginator import Paginator
 from django.contrib.staticfiles.finders import find as find_static_file
 from django.http import FileResponse
 from django.conf import settings
 
-from .utils import BraceMessage as _, hash6
-from .models import MovieTv as MT, Score, Tag
+from .utils import BraceMessage as _, hash6, flatten2D
+from .models import MovieTv as MT, Participant as Par, Score, Tag
 
 logger = logging.getLogger('movietv')
 
@@ -226,7 +226,87 @@ def calvdiff(x, days):
 
 
 def celebrity(request):
-    pass
+    names = request.GET.get('names')
+
+    params = []
+    logdict = {}
+    msg = 'Statistic[celebrity]: '
+    if names is not None:
+        params.append(names.strip())
+        msg += 'names({names}) '
+        logdict['names'] = names
+
+    logger.debug(_(msg, **logdict))
+
+    today = datetime.today()
+    fil = 'images/' + today.strftime('%Y-%m-%d') + '-celebrity-' + \
+                hash6(params) + '.svg'
+    if find_static_file(fil) is not None:
+        return render(request, 'img.html', {'imgpath': fil})
+
+    query = Q()
+    for s in names.split(','):
+        s = s.strip()
+        sq = Q()
+        for n in s.split(' '):
+            sq &= Q(celebrity_id__name__contains=n)
+
+        query |= sq
+
+    lS = Score.objects.filter(id__exact=OuterRef('subject_id')).order_by('-score_date')
+    query &= Q(subject_id__score__score_date=Subquery(lS.values('score_date')[:1]))
+    query &= Q(subject_id__release_date__year__gt=1000)
+
+    qS = Par.objects.filter(query).annotate(cid=F('celebrity_id'),
+                                        sid=F('subject_id'),
+                                        name=F('celebrity_id__name'),
+                                        title=F('subject_id__title'),
+                                        rdate=F('subject_id__release_date'),
+                                        score=F('subject_id__score__score'),
+                                        ).values('cid', 'name', 'sid', 'title',
+                                                'rdate', 'score', 'role')
+
+    logger.debug(str(qS.query))
+
+    df = pd.DataFrame(qS)
+
+    gps = df.groupby(['cid', 'role'])
+
+    nplot = len(gps)
+    if nplot > 8:
+        nplot = 8
+
+    nrows = math.ceil(nplot / 2)
+    ncols = 2 if nrows > 1 else nplot
+
+    plt.style.use('ggplot')
+
+    fig, axs = plt.subplots(nrows, ncols, squeeze=False)
+    fig.set_size_inches(12, 16)
+
+    fontpath = '/usr/share/fonts/source-han-serif/SourceHanSerifSC-Regular.otf'
+    font = mfm.FontProperties(fname=fontpath)
+
+    roleDict = {'director': '导演', 'actor': '演员', 'scriptwriter': '编剧'}
+    gen = flatten2D(axs)
+    try:
+        for crtuple, group in gps:
+            ax = next(gen)
+            group = group.sort_values('rdate')
+            group['avgscore'] = df['score'].expanding().mean()
+            logger.debug(df.loc[:, ['name', 'role', 'rdate', 'score', 'avgscore']])
+            ax.plot(group['rdate'], group['avgscore'], marker='.')
+            txt = group.iloc[0]['name'] + '(' + roleDict[group.iloc[0]['role']] + ')'
+            ax.text(0.05, 0.9, txt, transform=ax.transAxes,
+                        fontproperties=font)
+    except StopIteration:
+        pass
+
+    absfil = settings.STATICFILES_DIRS[0] + fil
+    fig.savefig(absfil)
+
+    return render(request, 'img.html', {'imgpath': fil})
+
 
 def hottest(request):
     days = request.GET.get('days', 3)
@@ -252,9 +332,9 @@ def hottest(request):
     logger.debug(_(msg, **logdict))
 
     today = datetime.today()
-    fil = 'images/' + today.strftime('%Y-%m-%d') + '-' + hash6(params) + '.svg'
+    fil = 'images/' + today.strftime('%Y-%m-%d') + '-hottest-' + hash6(params) + '.svg'
     if find_static_file(fil) is not None:
-        return render(request, 'hottest.html', {'imgpath': fil})
+        return render(request, 'img.html', {'imgpath': fil})
         #return FileResponse(open(absfil, 'rb'))
 
     sdate = today - timedelta(days=700)
@@ -313,5 +393,5 @@ def hottest(request):
     absfil = settings.STATICFILES_DIRS[0] + fil
     fig.savefig(absfil)
 
-    return render(request, 'hottest.html', {'imgpath': fil})
+    return render(request, 'img.html', {'imgpath': fil})
     #return FileResponse(open(absfil, 'rb'))

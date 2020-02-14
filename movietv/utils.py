@@ -16,3 +16,7 @@ def hash6(l):
 
     return m.hexdigest()[:6]
 
+def flatten2D(ll):
+    for r in ll:
+        for c in r:
+            yield c
