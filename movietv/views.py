@@ -249,7 +249,7 @@ def celebrity(request):
         s = s.strip()
         sq = Q()
         for n in s.split(' '):
-            sq &= Q(celebrity_id__name__contains=n)
+            sq &= Q(celebrity_id__name__icontains=n)
 
         query |= sq
 
@@ -282,7 +282,7 @@ def celebrity(request):
     plt.style.use('ggplot')
 
     fig, axs = plt.subplots(nrows, ncols, squeeze=False)
-    fig.set_size_inches(12, 16)
+    fig.set_size_inches(ncols * 6, nrows * 4)
 
     fontpath = '/usr/share/fonts/source-han-serif/SourceHanSerifSC-Regular.otf'
     font = mfm.FontProperties(fname=fontpath)
@@ -293,9 +293,12 @@ def celebrity(request):
         for crtuple, group in gps:
             ax = next(gen)
             group = group.sort_values('rdate')
-            group['avgscore'] = df['score'].expanding().mean()
-            logger.debug(df.loc[:, ['name', 'role', 'rdate', 'score', 'avgscore']])
+            group['avgscore'] = group['score'].expanding().mean()
+            logger.debug(group.loc[:, ['name', 'role', 'rdate', 'score', 'avgscore']])
             ax.plot(group['rdate'], group['avgscore'], marker='.')
+            ax.plot(group['rdate'], group['score'], marker='.')
+            ax.set_ylim([2, 10])
+            ax.get_xaxis().axis_date()
             txt = group.iloc[0]['name'] + '(' + roleDict[group.iloc[0]['role']] + ')'
             ax.text(0.05, 0.9, txt, transform=ax.transAxes,
                         fontproperties=font)
