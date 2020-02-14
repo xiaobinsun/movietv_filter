@@ -1,5 +1,5 @@
 function buildHotRequest() {
-    let url = '?';
+    let url = 'hottest?';
     let sl = document.querySelector('#days');
     let input = document.querySelector('#rdays');
 

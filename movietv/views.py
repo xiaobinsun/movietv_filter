@@ -18,7 +18,7 @@ from django.contrib.staticfiles.finders import find as find_static_file
 from django.http import FileResponse
 from django.conf import settings
 
-from .utils import BraceMessage as _
+from .utils import BraceMessage as _, hash6
 from .models import MovieTv as MT, Score, Tag
 
 logger = logging.getLogger('movietv')
@@ -27,6 +27,9 @@ all_colors = [k for k, v in pltc.cnames.items()]
 
 class HomePageView(TemplateView):
     template_name = 'index.html'
+
+class StatisPageView(TemplateView):
+    template_name = 'statis.html'
 
 def pagination_render(page):
     ptor = page.paginator
@@ -222,30 +225,34 @@ def calvdiff(x, days):
                       'vavg': vavg})
 
 
-def statis(request):
-    if len(request.GET) == 0:
-        return render(request, 'statis.html')
+def celebrity(request):
+    pass
 
+def hottest(request):
     days = request.GET.get('days', 3)
     rdays =request.GET.get('rdays', None)
     counts = request.GET.get('counts', 30)
 
+    params = []
     logdict = {}
-    msg = 'Statistic: '
+    msg = 'Statistic[hottest]: '
     if days is not None:
+        params.append('days='+days)
         msg += 'days({days}) '
         logdict['days'] = days
     if rdays is not None:
+        params.append('rdays='+rdays)
         msg += 'rdays({rdays}) '
         logdict['rdays'] = rdays
     if counts is not None:
+        params.append('counts='+str(counts))
         msg += 'counts({counts}) '
         logdict['counts'] = counts
 
     logger.debug(_(msg, **logdict))
 
     today = datetime.today()
-    fil = 'images/' + today.strftime('%Y-%m-%d') + '-' + str(days) + '.svg'
+    fil = 'images/' + today.strftime('%Y-%m-%d') + '-' + hash6(params) + '.svg'
     if find_static_file(fil) is not None:
         return render(request, 'hottest.html', {'imgpath': fil})
         #return FileResponse(open(absfil, 'rb'))
