@@ -1,10 +1,10 @@
-#hotdiv {
+#hotdiv, #celebdiv {
     margin-left: 50px;
 }
 #releasedays {
     margin-left: 30px;
 }
-input {
+#rdays {
     width: 40px;
     margin-left: 5px;
     -moz-appearance: textfield;
