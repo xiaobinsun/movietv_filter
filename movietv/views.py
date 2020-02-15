@@ -7,6 +7,7 @@ import pandas as pd
 import matplotlib.font_manager as mfm
 import matplotlib.pyplot as plt
 import matplotlib.colors as pltc
+from matplotlib.dates import DateFormatter
 from random import sample
 
 from django.shortcuts import render, redirect, resolve_url
@@ -24,6 +25,8 @@ from .models import MovieTv as MT, Participant as Par, Score, Tag
 logger = logging.getLogger('movietv')
 
 all_colors = [k for k, v in pltc.cnames.items()]
+
+pd.plotting.register_matplotlib_converters()
 
 class HomePageView(TemplateView):
     template_name = 'index.html'
@@ -270,6 +273,7 @@ def celebrity(request):
 
     df = pd.DataFrame(qS)
 
+    df['rdate'] = pd.to_datetime(df['rdate'])
     gps = df.groupby(['cid', 'role'])
 
     nplot = len(gps)
@@ -295,8 +299,12 @@ def celebrity(request):
             group = group.sort_values('rdate')
             group['avgscore'] = group['score'].expanding().mean()
             logger.debug(group.loc[:, ['name', 'role', 'rdate', 'score', 'avgscore']])
-            ax.plot(group['rdate'], group['avgscore'], marker='.')
-            ax.plot(group['rdate'], group['score'], marker='.')
+            ax.plot(group['rdate'], group['avgscore'], marker='.',
+                    label='avgscore')
+            ax.plot(group['rdate'], group['score'], marker='.', label='score')
+            formatter = DateFormatter('%Y')
+            ax.xaxis.set_major_formatter(formatter)
+            ax.legend(loc='lower right')
             ax.set_ylim([2, 10])
             ax.get_xaxis().axis_date()
             txt = group.iloc[0]['name'] + '(' + roleDict[group.iloc[0]['role']] + ')'
