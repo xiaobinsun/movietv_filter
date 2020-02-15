@@ -304,6 +304,13 @@ def celebrity(request):
                         fontproperties=font)
     except StopIteration:
         pass
+    finally:
+        try:
+            while(1):
+                ax = next(gen)
+                ax.set_visible(False)
+        except StopIteration:
+            pass
 
     absfil = settings.STATICFILES_DIRS[0] + fil
     fig.savefig(absfil)
