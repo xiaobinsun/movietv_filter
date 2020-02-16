@@ -1,4 +1,7 @@
+import logging
 import hashlib
+
+logger = logging.getLogger('movietv')
 
 class BraceMessage:
     def __init__(self, fmt, *args, **kwargs):
@@ -20,3 +23,19 @@ def flatten2D(ll):
     for r in ll:
         for c in r:
             yield c
+
+def colorMap(l):
+    colors = ['xkcd:red', 'xkcd:pink', 'xkcd:blue', 'xkcd:green', 'xkcd:purple',
+              'xkcd:brown', 'xkcd:yellow', 'xkcd:orange', 'xkcd:teal', 'xkcd:magenta',
+              'xkcd:violet', 'xkcd:cyan', 'xkcd:turquoise', 'xkcd:tan', 'xkcd:aqua',
+              'xkcd:maroon', 'xkcd:salmon', 'xkcd:hot pink', 'xkcd:gold', 'xkcd:light orange',
+              'xkcd:goldenrod', 'xkcd:seablue', 'xkcd:coral', 'xkcd:azure', 'xkcd:pinkish',
+              'xkcd:scarlet', 'xkcd:pumpkin', 'xkcd:tangerine', 'xkcd:orchid', 'xkcd:jade',
+              'xkcd:bright yellow', 'xkcd:terra cotta', 'xkcd:lemon', 'xkcd:dusky rose',
+              'xkcd:rust orange', 'xkcd:ice', 'xkcd:sand brown', 'xkcd:desert', 'xkcd:dust']
+
+    r = []
+    for t in l:
+        r.append(colors[int(hash6(t), 16) % len(colors)])
+
+    return r

@@ -6,7 +6,6 @@ import math
 import pandas as pd
 import matplotlib.font_manager as mfm
 import matplotlib.pyplot as plt
-import matplotlib.colors as pltc
 from matplotlib.dates import DateFormatter
 from random import sample
 
@@ -19,12 +18,10 @@ from django.contrib.staticfiles.finders import find as find_static_file
 from django.http import FileResponse
 from django.conf import settings
 
-from .utils import BraceMessage as _, hash6, flatten2D
+from .utils import BraceMessage as _, hash6, flatten2D, colorMap
 from .models import MovieTv as MT, Participant as Par, Score, Tag
 
 logger = logging.getLogger('movietv')
-
-all_colors = [k for k, v in pltc.cnames.items()]
 
 pd.plotting.register_matplotlib_converters()
 
@@ -385,8 +382,7 @@ def hottest(request):
     fig.set_size_inches(9, 6)
     fig.patch.set_visible(False)
 
-    color = sample(all_colors, counts)
-    df['vavg'].plot.barh(ax=ax, color=color)
+    df['vavg'].plot.barh(ax=ax, color=colorMap(df['title']))
     #ax.get_yaxis().set_visible(False)
     ax.set_yticklabels([i for i in range(1, counts + 1)])
     ax.invert_yaxis()
