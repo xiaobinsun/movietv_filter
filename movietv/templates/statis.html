@@ -37,6 +37,48 @@
     <div id="celebimg">
     </div>
   </div>
+  <div id="rbardiv">
+    <h3> 按地区统计 </h3>
+    <form>
+      <span class="tag"> 上映时间 </span>
+      <input type="number" min="0" value="0" id="begin">
+      <label for="begin"> 天 </label>
+      <span id="dash"> - </span>
+      <input type="number" min="0" placeholder="MAX" id="end">
+      <label for="end"> 天 </label>
+
+      <span id="tpspan"> 类型 </span>
+      <select id="type">
+        <option value="全部类型"> 全部类型 </option>
+        <option value="剧情"> 剧情 </option>
+        <option value="喜剧"> 喜剧 </option>
+        <option value="动作"> 动作 </option>
+        <option value="爱情"> 爱情 </option>
+        <option value="科幻"> 科幻 </option>
+        <option value="动画"> 动画 </option>
+        <option value="悬疑"> 悬疑 </option>
+        <option value="惊悚"> 惊悚 </option>
+        <option value="恐怖"> 恐怖 </option>
+        <option value="犯罪"> 犯罪 </option>
+        <option value="同性"> 同性 </option>
+        <option value="音乐"> 音乐 </option>
+        <option value="歌舞"> 歌舞 </option>
+        <option value="传记"> 传记</option>
+        <option value="历史"> 历史</option>
+        <option value="战争"> 战争</option>
+        <option value="西部"> 西部</option>
+        <option value="奇幻"> 奇幻</option>
+        <option value="冒险">冒险 </option>
+        <option value="灾难"> 灾难</option>
+        <option value="武侠"> 武侠</option>
+        <option value="情色"> 情色</option>
+        <option value="纪录片"> 纪录片</option>
+      </select>
+      <button type="button" id="rbarsubmit"> 提交 </button>
+    </form>
+    <div id="rbarimg">
+    </div>
+  </div>
 
 </body>
 </html>

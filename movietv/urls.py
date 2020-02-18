@@ -9,5 +9,6 @@ urlpatterns = [
     path('statis/', views.StatisPageView.as_view(), name='statis'),
     path('statis/hottest/', views.hottest, name='hottest'),
     path('statis/celebrity/', views.celebrity, name='celebrity'),
+    path('statis/regionbar/', views.regionbar, name='regionbar'),
     path('filter/', views.filter, name='filter'),
 ]

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from io import BytesIO
 
 import math
+import numpy as np
 import pandas as pd
 import matplotlib.font_manager as mfm
 import matplotlib.pyplot as plt
@@ -271,7 +272,7 @@ def celebrity(request):
     df = pd.DataFrame(qS)
 
     df['rdate'] = pd.to_datetime(df['rdate'])
-    gps = df.groupby(['cid', 'role'])
+    gps = df.groupby(['cid', 'role'], sort=False)
 
     nplot = len(gps)
     if nplot > 8:
@@ -321,7 +322,6 @@ def celebrity(request):
     fig.savefig(absfil)
 
     return render(request, 'img.html', {'imgpath': fil})
-
 
 def hottest(request):
     days = request.GET.get('days', 3)
@@ -409,3 +409,105 @@ def hottest(request):
 
     return render(request, 'img.html', {'imgpath': fil})
     #return FileResponse(open(absfil, 'rb'))
+
+def parseRegion(df):
+    region = df['region'][0].replace('\n', '').strip()
+
+    columns = ['id', 'region', 'score', 'votes']
+    rdf = pd.DataFrame(columns=columns)
+    for s in region.split('/'):
+        s = s.strip()
+        rdf.loc[len(rdf)] = {'id': df['id'][0], 'region': s,
+                             'score': df['score'][0], 'votes': df['votes'][0]}
+
+    return rdf
+
+def regionbar(request):
+    timerange = request.GET.get('timerange', None)
+    tp = request.GET.get('type', None)
+
+    msg = 'Statis/regionbar '
+    logdict = {}
+    params = []
+
+    if timerange is not None:
+        params.append('timerange='+timerange)
+        msg += 'timerange({timerange}) '
+        logdict['timerange'] = timerange
+
+    if tp is not None:
+        params.append('type='+tp)
+        msg += 'type({type}) '
+        logdict['type'] = tp
+
+    logger.debug(_(msg, **logdict))
+
+    today = datetime.today()
+    fil = 'images/' + today.strftime('%Y-%m-%d') + '-regionbar-' + hash6(params) + '.svg'
+    if find_static_file(fil) is not None:
+        return render(request, 'img.html', {'imgpath': fil})
+
+    ts = te = None
+    if timerange is not None:
+        ts = timerange.split(',')[0]
+        te = timerange.split(',')[1]
+        ts = None if len(ts) == 0 else ts
+        te = None if len(te) == 0 else te
+
+    query = Q()
+
+    if timerange is not None:
+        if ts is not None:
+            edate = datetime.today() - timedelta(days=int(ts))
+            query &= Q(release_date__lte=edate)
+        if te is not None:
+            sdate = datetime.today() - timedelta(days=int(te))
+            query &= Q(release_date__gte=sdate)
+
+    if tp is not None:
+        query &= Q(tag__tag__contains=tp)
+
+    query &= Q(region__isnull=False)
+
+    lS = Score.objects.filter(id__exact=OuterRef('id')).order_by('-score_date')
+    query &= Q(score__score_date=Subquery(lS.values('score_date')[:1]))
+
+    qS = MT.objects.filter(query).values('id', 'region',
+                                'score__score', 'score__votes')
+
+    logger.debug(str(qS.query))
+
+    df = pd.DataFrame(qS).rename(columns={'score__score':'score',
+                                          'score__votes':'votes'})
+    df = df.groupby(by='id', sort=False, group_keys=False, as_index=False).apply(parseRegion)
+
+    df['score'] = pd.to_numeric(df['score'])
+    df['votes'] = pd.to_numeric(df['votes'])
+    df = df.groupby(by='region', sort=False, group_keys=False).agg(
+        avgscore=('score', np.mean), avgvotes=('votes', np.mean),
+        size=('id', np.size))
+    df = df.sort_values('size', ascending=False)[:20]
+
+    # plot
+
+    plt.style.use('ggplot')
+
+    fontpath = '/usr/share/fonts/source-han-serif/SourceHanSerifSC-Regular.otf'
+    font = mfm.FontProperties(fname=fontpath)
+
+    fig, axs = plt.subplots(1, 2, squeeze=False)
+    fig.set_size_inches(12, 4)
+
+    ax0, ax1 = axs[0]
+    ax0.bar(df.index, df['size'], color=colorMap(df.index))
+    ax0.set_xticklabels(df.index, fontproperties=font, rotation='vertical')
+    ax0twin = ax0.twinx()
+    ax0twin.plot(df.index, df['avgscore'])
+    ax0twin.set_ylim([2, 10])
+
+    ax1.bar(df.index, df['avgvotes'], color=colorMap(df.index))
+    ax1.set_xticklabels(df.index, fontproperties=font, rotation='vertical')
+    absfil = settings.STATICFILES_DIRS[0] + fil
+    fig.savefig(absfil)
+
+    return render(request, 'img.html', {'imgpath': fil})

@@ -1,14 +1,17 @@
-#hotdiv, #celebdiv {
+#hotdiv, #celebdiv, #rbardiv{
     margin-left: 50px;
 }
 #releasedays {
     margin-left: 30px;
 }
-#rdays {
+#rdays, #begin, #end {
     width: 40px;
     margin-left: 5px;
     -moz-appearance: textfield;
 }
-#hotsubmit {
+#tpspan {
+    margin-left: 30px;
+}
+button {
     margin-left: 10px;
 }
