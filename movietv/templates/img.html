@@ -1,2 +1,6 @@
 {% load static %}
-<img src="{{request.scheme}}://{{request.META.HTTP_HOST}}{% static imgpath %}">
+{% if imgpath is not None %}
+  <img src="{{request.scheme}}://{{request.META.HTTP_HOST}}{% static imgpath %}">
+{% else %}
+  <p> 抱歉，由于数据不完整，暂时无法完成查询 </p>
+{% endif %}

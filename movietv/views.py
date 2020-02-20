@@ -372,6 +372,9 @@ def hottest(request):
                                 x['score_date'].max() >= sdate
                                            and len(x) > 1)
     df = df.groupby(by='id', sort=False).apply(calvdiff, days=days)
+    if len(df) == 0:
+        return render(request, 'img.html', {'imgpath': None})
+
     df = df.sort_values('vavg', ascending=False)
     df = df[:counts]
 
@@ -479,6 +482,8 @@ def regionbar(request):
 
     df = pd.DataFrame(qS).rename(columns={'score__score':'score',
                                           'score__votes':'votes'})
+    if len(df) == 0:
+        return render(request, 'img.html', {'imgpath': None})
     df = df.groupby(by='id', sort=False, group_keys=False, as_index=False).apply(parseRegion)
 
     df['score'] = pd.to_numeric(df['score'])
@@ -502,7 +507,7 @@ def regionbar(request):
     ax0.bar(df.index, df['size'], color=colorMap(df.index))
     ax0.set_xticklabels(df.index, fontproperties=font, rotation='vertical')
     ax0twin = ax0.twinx()
-    ax0twin.plot(df.index, df['avgscore'])
+    ax0twin.plot(df.index, df['avgscore'], marker='.')
     ax0twin.set_ylim([2, 10])
 
     ax1.bar(df.index, df['avgvotes'], color=colorMap(df.index))

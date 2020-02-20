@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 
 import os
 
+from celery.schedules import crontab
+
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -23,9 +25,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'vqn#no1h0-6q26h&7n#jo5gqurk4804&*ir_bhblc-3z1%5ahm'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['167.179.118.45']
+ALLOWED_HOSTS = ['167.179.118.45', 'testserver']
 
 
 # Application definition
@@ -160,5 +162,19 @@ LOGGING = {
             'level': 'DEBUG',
             'propagate': False,
         },
+    },
+}
+
+# Celery
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_TIMEZONE = 'Asia/Chongqing'
+CELERY_BEAT_SCHEDULE = {
+    'generate-hottest': {
+        'task': 'hottest',
+        'schedule': crontab(minute=0,hour=1),
+    },
+    'generate-regionbar': {
+        'task': 'regionbar',
+        'schedule': crontab(minute=0,hour=2),
     },
 }
