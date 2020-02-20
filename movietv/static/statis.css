@@ -1,10 +1,10 @@
-#hotdiv, #celebdiv, #rbardiv{
+#hotdiv, #celebdiv, #rbardiv, #typebardiv{
     margin-left: 50px;
 }
 #releasedays {
     margin-left: 30px;
 }
-#rdays, #begin, #end {
+#rdays, #begin, #end, #tbegin, #tend {
     width: 40px;
     margin-left: 5px;
     -moz-appearance: textfield;

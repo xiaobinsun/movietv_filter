@@ -18,10 +18,10 @@ function buildCelebRequest() {
     url += 'names=' + input.value.replace(/，/g, ',');
     return url;
 }
-function buildTimeRange(addAm) {
+function buildTimeRange(addAm, bid, eid) {
     let str = '';
-    let ts = document.querySelector('#begin');
-    let te = document.querySelector('#end');
+    let ts = document.querySelector(bid);
+    let te = document.querySelector(eid);
     if (ts.value.length != 0 && ts.value != '0')
         str += ts.value;
     str += ',';
@@ -54,12 +54,21 @@ function buildType(addAm) {
 }
 
 function buildRbarRequest() {
-    let url = 'regionbar?';
+    let url = 'regionbar/?';
 
-    url += buildTimeRange(url[url.length-1] != '?');
+    url += buildTimeRange(url[url.length-1] != '?', '#begin', '#end');
     url += buildType(url[url.length-1] != '?');
 
     return url;
+}
+function buildTypebarRequest() {
+    let url = 'typebar/?';
+
+    url += buildTimeRange(url[url.length-1] != '?', '#tbegin', '#tend');
+    if (url[url.length-1] == '?')
+        url = 'typebar/'
+
+    return url
 }
 document.addEventListener('DOMContentLoaded', function(){
     let bton = document.querySelector('#hotsubmit');
@@ -91,6 +100,17 @@ document.addEventListener('DOMContentLoaded', function(){
             then((response) => response.text()).
             then((html) => {
                 let div = document.querySelector('#rbarimg');
+
+                div.innerHTML = html;
+            });
+    });
+
+    bton = document.querySelector('#typebarsubmit');
+    bton.addEventListener('click', e => {
+        fetch(buildTypebarRequest()).
+            then((response) => response.text()).
+            then((html) => {
+                let div = document.querySelector('#typebarimg');
 
                 div.innerHTML = html;
             });

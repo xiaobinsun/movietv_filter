@@ -36,3 +36,13 @@ def generate_regionbar():
         c.get(url, {'timerange': ',%s' % i})
         for t in tp:
             c.get(url, {'timerange': ',%s' % i, 'type': t})
+
+@task(name='typebar')
+def generate_typebar():
+    url = '/movietv/statis/typebar/'
+    edate = [5, 10, 15, 30, 60, 90, 120, 180, 200, 250,
+             300, 365, 500, 600, 700, 800, 900, 1000]
+
+    c.get(url)
+    for i in edate:
+        c.get(url, {'timerange': ',%s' % i})

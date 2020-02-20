@@ -175,6 +175,10 @@ CELERY_BEAT_SCHEDULE = {
     },
     'generate-regionbar': {
         'task': 'regionbar',
+        'schedule': crontab(minute=0,hour=3),
+    },
+    'generate-typebar': {
+        'task': 'typebar',
         'schedule': crontab(minute=0,hour=2),
     },
 }

@@ -516,3 +516,89 @@ def regionbar(request):
     fig.savefig(absfil)
 
     return render(request, 'img.html', {'imgpath': fil})
+
+def typebar(request):
+    timerange = request.GET.get('timerange', None)
+
+    msg = 'Statis/typebar '
+    logdict = {}
+    params = []
+
+    if timerange is not None:
+        params.append('timerange='+timerange)
+        msg += 'timerange({timerange}) '
+        logdict['timerange'] = timerange
+
+    logger.debug(_(msg, **logdict))
+
+    today = datetime.today()
+    fil = 'images/' + today.strftime('%Y-%m-%d') + '-typebar-' + hash6(params) + '.svg'
+    if find_static_file(fil) is not None:
+        return render(request, 'img.html', {'imgpath': fil})
+
+    ts = te = None
+    if timerange is not None:
+        ts = timerange.split(',')[0]
+        te = timerange.split(',')[1]
+        ts = None if len(ts) == 0 else ts
+        te = None if len(te) == 0 else te
+
+    query = Q()
+
+    if timerange is not None:
+        if ts is not None:
+            edate = datetime.today() - timedelta(days=int(ts))
+            query &= Q(release_date__lte=edate)
+        if te is not None:
+            sdate = datetime.today() - timedelta(days=int(te))
+            query &= Q(release_date__gte=sdate)
+
+    tp = ['剧情', '喜剧', '动作', '爱情', '科幻', '动画', '悬疑',
+          '惊悚', '恐怖', '犯罪', '同性', '音乐', '歌舞', '传记',
+          '历史', '战争', '西部', '奇幻', '冒险', '灾难', '武侠',
+          '情色', '纪录片']
+    tpq = Q()
+    for t in tp:
+        tpq |= Q(tag__tag=t)
+
+    query &= tpq
+
+    lS = Score.objects.filter(id__exact=OuterRef('id')).order_by('-score_date')
+    query &= Q(score__score_date=Subquery(lS.values('score_date')[:1]))
+
+    qS = MT.objects.filter(query).values('id', 'tag__tag', 'score__score',
+                                         'score__votes')
+
+    logger.debug(str(qS.query))
+
+    df = pd.DataFrame(qS).rename(columns={'tag__tag': 'tag',
+                                          'score__score':'score',
+                                          'score__votes':'votes'})
+
+    df = df.groupby('tag', sort=False).agg(size=('id', np.size),
+                                      avgscore=('score', np.mean),
+                                      avgvotes=('votes', np.mean))
+    df = df.sort_values('size', ascending=False)[:20]
+
+    # plot
+    plt.style.use('ggplot')
+
+    fontpath = '/usr/share/fonts/source-han-serif/SourceHanSerifSC-Regular.otf'
+    font = mfm.FontProperties(fname=fontpath)
+
+    fig, axs = plt.subplots(1, 2, squeeze=False)
+    fig.set_size_inches(12, 4)
+
+    ax0, ax1 = axs[0]
+    ax0.bar(df.index, df['size'], color=colorMap(df.index))
+    ax0.set_xticklabels(df.index, fontproperties=font, rotation='vertical')
+    ax0twin = ax0.twinx()
+    ax0twin.plot(df.index, df['avgscore'], marker='.')
+    ax0twin.set_ylim([2, 10])
+
+    ax1.bar(df.index, df['avgvotes'], color=colorMap(df.index))
+    ax1.set_xticklabels(df.index, fontproperties=font, rotation='vertical')
+    absfil = settings.STATICFILES_DIRS[0] + fil
+    fig.savefig(absfil)
+
+    return render(request, 'img.html', {'imgpath': fil})
