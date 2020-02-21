@@ -575,6 +575,9 @@ def typebar(request):
                                           'score__score':'score',
                                           'score__votes':'votes'})
 
+    if len(df) == 0:
+        return render(request, 'img.html', {'imgpath': None})
+
     df = df.groupby('tag', sort=False).agg(size=('id', np.size),
                                       avgscore=('score', np.mean),
                                       avgvotes=('votes', np.mean))
