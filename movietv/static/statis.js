@@ -82,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function(){
                 div.innerHTML = html;
             });
     });
+    bton.click()
 
     bton = document.querySelector('#celebsubmit');
     bton.addEventListener('click', e => {
