@@ -395,8 +395,11 @@ def hottest(request):
     fontpath = '/usr/share/fonts/source-han-serif/SourceHanSerifSC-Regular.otf'
     font = mfm.FontProperties(fname=fontpath)
     for idx in range(counts):
+        disCoord = ax.transData.transform((df.iloc[idx].vavg, idx))
+        disCoord[0] += 5
+        inv = ax.transData.inverted()
         ax.annotate('{}({})'.format(df.iloc[idx].title, df.iloc[idx].score),
-                    (df.iloc[idx].vavg + 30, idx),
+                    inv.transform(disCoord),
                     url='https://movie.douban.com/subject/'+str(df.index[idx])+'/',
                     fontproperties=font, va='center')
         '''
