@@ -1,5 +1,6 @@
 {% load attr_exist static %}
-{% if imgpath is not None and {% attr_exist request.META "HTTP_HOST" %} %}
+{% attr_exist request.META "HTTP_HOST" as has_client %}
+{% if imgpath is not None and has_client %}
   <img src="{{request.scheme}}://{{request.META.HTTP_HOST}}{% static imgpath %}">
 {% else %}
   <p> 抱歉，由于数据不完整，暂时无法完成查询 </p>
