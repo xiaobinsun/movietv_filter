@@ -320,6 +320,7 @@ def celebrity(request):
 
     absfil = settings.STATICFILES_DIRS[0] + fil
     fig.savefig(absfil)
+    plt.close(fig)
 
     return render(request, 'img.html', {'imgpath': fil})
 
@@ -412,6 +413,7 @@ def hottest(request):
 
     absfil = settings.STATICFILES_DIRS[0] + fil
     fig.savefig(absfil)
+    plt.close(fig)
 
     return render(request, 'img.html', {'imgpath': fil})
     #return FileResponse(open(absfil, 'rb'))
@@ -517,6 +519,7 @@ def regionbar(request):
     ax1.set_xticklabels(df.index, fontproperties=font, rotation='vertical')
     absfil = settings.STATICFILES_DIRS[0] + fil
     fig.savefig(absfil)
+    plt.close(fig)
 
     return render(request, 'img.html', {'imgpath': fil})
 
@@ -606,5 +609,6 @@ def typebar(request):
     ax1.set_xticklabels(df.index, fontproperties=font, rotation='vertical')
     absfil = settings.STATICFILES_DIRS[0] + fil
     fig.savefig(absfil)
+    plt.close(fig)
 
     return render(request, 'img.html', {'imgpath': fil})

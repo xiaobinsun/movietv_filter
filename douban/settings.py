@@ -82,7 +82,7 @@ DATABASES = {
         'NAME': 'douban_scrapy',
         'USER': 'sun',
         'PASSWORD': 'sun1588sun.MYSQL',
-        'CONN_MAX_AGE': None,
+        'CONN_MAX_AGE': 0,
     }
 }
 
