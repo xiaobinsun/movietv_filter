@@ -143,7 +143,7 @@ def filter(request):
 
     query = Q()
 
-    formdict = {'电影': 'movie', '电视剧': 'tv'}
+    formdict = {'电影': 'film', '电视剧': 'tv'}
     if form is not None:
         query &= Q(type__exact=formdict[form])
 
